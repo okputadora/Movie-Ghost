@@ -16,19 +16,50 @@
 
 <body>
   <h1>Movie Ghost</h1>
-  <div id="welcome">
-    <h2>Select A Difficulty Level</h2>
-    <div id="button-container">
-      <div class="dif-but" id="ez">Easy</div>
-      <div class="dif-but" id="md">Medium</div>
-      <div class="dif-but" id="hrd">Hard</div>
+  <div id="main">
+    <div id="welcome">
+      <h2>Select A Difficulty Level</h2>
+      <div id="button-container">
+        <div class="dif-but" id="ez">Easy</div>
+        <div class="dif-but" id="md">Medium</div>
+        <div class="dif-but" id="hrd">Hard</div>
+      </div>
     </div>
-  </div>
 
-  <div id="main-game">
-    <form id="response">
-      <label>Enter A Movie or an Actor</label>
-    </form>
+    <div id="players-container">
+      <h2>Select The Number of Players</h2>
+      <div id="player-select">
+        <div class="player">
+          <h3>Player 1</h3>
+          <form action="">
+            <input type="radio" name="player-type" value="robot"> Robot<br>
+            <input type="radio" name="player-type" value="human"> Human<br>
+          </form>
+        </div>
+          <div class="player">
+            <h3>Player 2</h3>
+            <form action="">
+              <input type="radio" name="player-type" value="robot"> Robot<br>
+              <input type="radio" name="player-type" value="human"> Human<br>
+            </form>
+          </div>
+            <div class="player">
+              <h3>Player 3</h3>
+              <form action="">
+                <input type="radio" name="player-type" value="robot"> Robot<br>
+                <input type="radio" name="player-type" value="human"> Human<br>
+              </form>
+            </div>
+            <div class="player">
+              <h3>Player 4</h3>
+              <form action="">
+                <input type="radio" name="player-type" value="robot"> Robot<br>
+                <input type="radio" name="player-type" value="human"> Human<br>
+              </form>
+            </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div id="footer">
