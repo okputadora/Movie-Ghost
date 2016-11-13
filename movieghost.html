@@ -59,8 +59,43 @@
             </div>
         </div>
       </div>
+
+      <div id="main-game">
+        <div id="stats">
+          <div id="round">Round: 0</div>
+          <div id="turn">Turn: 0</div>
+        </div>
+        <!-- Add 4 human responses and robot responses
+        and set their displays according to the number
+        of players actually chose -->
+        <div id="main-viewer">
+          <div id="active-players">
+            <div class="player-icon">
+              <div class="username" id="p1">
+                <h2>Player 1</h2>
+              </div>
+              <div class="prompt">
+                <h3>Enter a movie or an actor</h3>
+              </div>
+              <div class="input">
+                <input class="searchTerm" type="text" placeholder="Movie or Actor..." />
+                <i class="fa fa-arrow-right" aria-hidden="true"></i>
+              </div>
+            </div>
+            <div class="player-icon">
+              <div class="username" id="p2">
+                <h2>Player 2</h2>
+                <i class="fa fa-spinner" aria-hidden="true"></i>
+              </div>
+            </div>
+          </div>
+          <div id="game-map">
+            <h2>Round 1</h2>
+            <div id="turn-display"></div>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
 
   <div id="footer">
     <h3>A Project by Michael McVeigh</h3>
@@ -69,6 +104,7 @@
 </body>
 
 
+<script src="https://use.fontawesome.com/041a8a6fad.js"></script>
 <script src= "jQuery.js"></script>
 <!--Needed for jquery functions -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
