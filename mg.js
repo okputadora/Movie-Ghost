@@ -52,7 +52,7 @@ $(document).ready(function(){
       var j = i + 1
       var num = j.toString();
       if (players[i] === "robot"){
-        // Append main viewer 
+        // Append main viewer
         $("#active-players").append("<div class='avatar'id='p" + num +"'>" +
                                     "<h2>Player " + num + "</h2><div class='name'>" +
                                     "<h3>Robot</h3></div>");
@@ -60,8 +60,9 @@ $(document).ready(function(){
       }
       if (players[i] === "human"){
         // Append main viewer
-        $("#active-players").append("<div class='avatar'id='p'" + num +
-                            "<h2>Player 1</h2><div class='prompt'><h3>" +
+        console.log("Human appended");
+        $("#active-players").append("<div class='avatar'id='p" + num +
+                            "'<h2>Player 1</h2><div class='prompt'><h3>" +
                             "Enter a movie or an actor</h3></div><div class='input'>" +
                             "<input id='searchTerm' type='text' placeholder=" +
                             "'Movie or Actor...' /><i id='submit' class='fa fa-arrow-right'" +
@@ -76,7 +77,8 @@ $(document).ready(function(){
   });
 
   // User input
-  $("#submit").click(function(){
+  $('#active-players').on('click', '#submit', function() {
+   alert("click");
     var searchTerm = $("#searchTerm").val();
     url = baseQ + key + lang + "&query=" + searchTerm;
     $.getJSON(url, searchMovie, "jsonp");
