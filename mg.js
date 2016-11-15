@@ -34,8 +34,13 @@ $(document).ready(function(){
 
   // choose dificulty
   $(".dif-but").click(function(){
-    $("#welcome").css("display", "none");
-    $("#players-container").css("display", "flex");
+    $("h2").slideUp(300);
+    $(".dif-but").slideUp(700);
+    setTimeout(function(){
+      $("#welcome").css("display", "none");
+      $("#players-container").css("display", "flex");
+    }, 1000);
+
 
   });
 
@@ -76,9 +81,9 @@ $(document).ready(function(){
     $("#main-game").css("display", "flex");
   });
 
+
   // User input
   $('#active-players').on('click', '#submit', function() {
-   alert("click");
     var searchTerm = $("#searchTerm").val();
     url = baseQ + key + lang + "&query=" + searchTerm;
     $.getJSON(url, searchMovie, "jsonp");
