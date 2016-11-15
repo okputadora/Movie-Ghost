@@ -39,6 +39,9 @@ $(document).ready(function(){
     setTimeout(function(){
       $("#welcome").css("display", "none");
       $("#players-container").css("display", "flex");
+      $(".player").slideDown(500);
+      $("#start").slideDown(300);
+
     }, 1000);
 
 

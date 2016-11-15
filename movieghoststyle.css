@@ -81,6 +81,7 @@ h1{
 }
 
 .player{
+  display: none;
   margin: 5px 50px 5px 50px;
   padding: 5px;
   border: 1px solid black;
@@ -92,6 +93,7 @@ h1{
 }
 
 #start{
+  display: none;
   background-color: #75BEFF;
   border: 1px solid black;
   border-radius: 5px;
