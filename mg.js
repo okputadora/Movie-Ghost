@@ -15,6 +15,7 @@ var trailId = "";
 var players = [];
 var gameOn = true;
 var cast = [];
+var titleIdAndCast = [];
 // 0 ez; 1 md; 2 hd
 var difficulty = 0;
 
@@ -22,8 +23,9 @@ function getRandomMovie(){
     movieId = Math.floor(Math.random() * 1000);
     console.log(movieId);
     var id = movieId.toString();
-    url = base + id + key + lang;
+    url = baseId + id + key + lang;
     $.getJSON(url, getMovieById, "jsonp");
+    return titleIdAndCast;
 }
 
 function searchMovie(data){
@@ -39,13 +41,21 @@ function searchMovie(data){
 function getMovieById(data){
   var title = data.title;
   var id = data.id;
-  return [id, title];
+  console.log(id, title);
+  console.log(titleIdAndCast);
+  titleIdAndCast.push(title);
+  titleIdAndCast.push(id);
   // get the cast
   url = baseId + id + "/credits" + key + lang;
+  $.getJSON(url, getCast, "jsonp");
+  titleIdAndCast.push(cast);
   }
 
 function getCast(data){
-  return data.cast;
+  for (var x = 0; x < data.cast.length; x++){
+    cast.push(data.cast[x].name);
+    console.log(data.cast[x].name);
+  }
 }
 
 function searchActor(data){
@@ -53,52 +63,53 @@ function searchActor(data){
 }
 
 function initiateGame(){
-  while (gameOn === True){
+  while (gameOn === true){
     var i = 0;
     if (i >= players.length){
       i = i%players.length;
     }
-    if (player[i] === "robot" && trail.length === 0){
+    if (players[i] === "robot" && trail.length === 0){
       // Pick a random actor or movie
       var actOrMove = Math.floor(Math.random() * 2)
         // get random movie
-        var titleAndId = getRandomMovie();
-        var id = titleAndId[1];
-        var title = titleAndId[0];
+        titleIdAndCast = getRandomMovie();
+        var id = titleIdAndCast[0];
+        var title = titleIdAndCast[1];
 
         // get the cast list
-        url = baseId + id + "/credits" + key + lang;
-        cast = $.getJson(url, getCast, "jsonp");
 
         if (actOrMove === 1){
           // append to trail
           trail.push(title);
           trailId = "movie";
+          console.log(trailId);
         }
         else if (actOrMove === 0){
           trail.push(cast[0]);
           trailId = "actor";
+          console.log(trailId)
         }
         // display answer
         // element.html(trail[-1])
+        gameOn = false;
       }
-    }
-    else if (player[i] === "human" && trail.length === 0){
+
+    else if (players[i] === "human" && trail.length === 0){
 
     }
-    else if (player[i] === "robot"){
+    else if (players[i] === "robot"){
 
     }
-    else if (player[i] === "human"){
+    else if (players[i] === "human"){
       if (trailId === "movie"){
         // when the user submits an actor check it
         // against the cast list
       }
-      else if (trailId === "actor"{
+      else if (trailId === "actor"){
         // search the movie
         // get the cast
         // check if actor is in cast list
-      })
+      }
     }
 
   }
@@ -129,7 +140,7 @@ $(document).ready(function(){
     players.push($('input[name="player2-type"]:checked').val());
     players.push($('input[name="player3-type"]:checked').val());
     players.push($('input[name="player4-type"]:checked').val());
-
+    console.log(players);
     // create the players
     for (var i = 0; i < players.length; i++){
       var j = i + 1
@@ -162,6 +173,8 @@ $(document).ready(function(){
         $("#main-game").css("display", "flex");
       });
     }, 2500);
+
+    initiateGame();
   });
 
   // User input
