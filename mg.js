@@ -13,69 +13,82 @@ var strikes = 0;
 var trail = [];
 var trailId = "";
 var players = [];
+var activePlayer = 0;
 var gameOn = true;
 var cast = [];
 var title = "";
 var id = 0;
+var response = "";
+var year;
+
+// Event listener
+var A;
+var B;
 // 0 ez; 1 md; 2 hd
 var difficulty = 0;
-function printResult(title, year, id){
-  console.log("Print result");
-  console.log(title);
-  console.log(id);
-  $("#p1 > h4:nth-child(3)").append(title);
-}
+
 function getRandomMovie(){
   id =  Math.floor(Math.random() * 1000);
   var idStr = id.toString();
   url = baseId + idStr + key + lang;
-  $.getJSON(url, function(data){
+  A = $.getJSON(url, function(data){
     title = data.title;
     id = data.id;
-    var year = data.release_date.slice(0,4);
-    printResult(title, year, id);
+    year = data.release_date.slice(0,4);
   }, "jsonp");
+  url = baseId + idStr + "/credits" + key + lang;
+  B = $.getJSON(url, function(data){
+    for (var x in data.cast){
+      cast.push(data.cast[x].name);
+    }
+  });
 }
 
 function initiateGame(){
-  while (gameOn === true){
-    var i = 0;
-    if (i >= players.length){
-      i = i%players.length;
-    }
-    if (players[i] === "robot"){
-      if (trail.length === 0){
-        // Pick a random actor or movie
-        var actOrMove = Math.floor(Math.random() * 2)
-          // get random movie
-          getRandomMovie();
+  activePlayer = 0;
+  if (activePlayer >= players.length){
+    activePlayer = activePlayer%players.length;
+  }
+  if (players[activePlayer] === "robot"){
+    if (trail.length === 0){
+      // Pick a random actor or movie
+      var actOrMove = Math.floor(Math.random() * 2)
+        // get random movie
+        getRandomMovie();
 
-          // get the cast list
-
+        // display results and add them to logs
+        $.when(A,B).done(function(){
+          console.log(cast);
+          var q = activePlayer +1;
+          var num = q.toString();
+          var yearStr = year.toString();
+          console.log(yearStr);
           if (actOrMove === 1){
             // append to trail
-            trail.push(title);
+            response = title;
             trailId = "movie";
-            console.log(trailId);
+            $("#p" + num + " > h5:nth-child(4)").append("(" + yearStr + ")");
           }
           else if (actOrMove === 0){
-            trail.push(cast[0]);
+            response = cast[0];
             trailId = "actor";
-            console.log(trailId)
           }
-        }
-      else{}
-      // display answer
-
-        // element.html(trail[-1]
-    }
-    else if (players[i] === "human" && trail.length === 0){
-      if (trail.length === 0){
+          $("#p" + num + " > h4:nth-child(3)").append(response);
+          trail.push(response);
+          console.log(trailId);
+        });
 
       }
-      else{}
+    else{}
+    // display answer
+
+      // element.html(trail[-1]
+  }
+  else if (players[i] === "human" && trail.length === 0){
+    if (trail.length === 0){
+
     }
-    gameOn = false;
+    else{}
   }
 }
 
@@ -113,7 +126,7 @@ $(document).ready(function(){
         // Append main viewer
         $("#active-players").append("<div class='avatar'id='p" + num +"'>" +
                                     "<h2>Player " + num + "</h2><div class='name'>" +
-                                    "<h3>Robot</h3></div><h4></h4>");
+                                    "<h3>Robot</h3></div><h4></h4><h5></h5>");
         // document.getElementById("active-players").appendChild("div");/
       }
       if (players[i] === "human"){
