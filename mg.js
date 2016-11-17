@@ -1,6 +1,6 @@
 // Global variables
 // Query parameters
-var baseQ = "https://api.themoviedb.org/3/search/movie";
+var baseQ = "https://api.themoviedb.org/3/search/";
 var baseId = "https://api.themoviedb.org/3/movie/";
 var key = "?api_key=2d60d8d7b8dd8bdbaf50624f2bd2caf2";
 var lang = "&language=en-US";
@@ -20,6 +20,9 @@ var title = "";
 var id = 0;
 var response = "";
 var year;
+var userSearch = "";
+var movieId = 0;
+var actOrMove = 0;
 
 // Event listener
 var A;
@@ -44,52 +47,109 @@ function getRandomMovie(){
   });
 }
 
+function getMovie(){
+  A = $.getJSON(url, function(data){
+    title = data.results[0].title;
+    id = data.results[0].title;
+    year = data.results[0].release_date.slice(0,4);
+    // search through trail to make sure this is a
+    // new response
+  }, "jsonp");
+  var idStr = id.toString();
+  url = baseId + idStr + "/credits" + key + lang;
+  B = $.getJSON(url, function(data){
+    cast = [];
+    for (var x in data.cast){
+        cast.push(data.cast[x].name);
+      }
+  }, "jsonp");
+}
+
+function searchMovie(searchTerm){
+  url = baseQ + "movie" + key + lang + "&query=" + searchTerm;
+  A = $.getJSON(url, function(data){
+    title = data.results[0].title;
+    movieId = data.results[0].id;
+    year = data.results[0].release_date.slice(0,4);
+  }, "jsonp");
+}
+function getCast(){
+    var idStr = movieId.toString()
+    url = baseId + idStr + "/credits" + key + lang;
+
+    B = $.getJSON(url, function(data){
+      for (var x in data.cast){
+          cast.push(data.cast[x].name);
+      }
+    }, "jsonp");
+  }
+
 function initiateGame(){
-  activePlayer = 0;
+  console.log("initiategamecalled");
+  console.log("Player: " + activePlayer)
+  var q = activePlayer + 1;
+  var num = q.toString();
   if (activePlayer >= players.length){
     activePlayer = activePlayer%players.length;
   }
   if (players[activePlayer] === "robot"){
     if (trail.length === 0){
       // Pick a random actor or movie
-      var actOrMove = Math.floor(Math.random() * 2)
-        // get random movie
-        getRandomMovie();
+      actOrMove = Math.floor(Math.random() * 2)
+      // get random movie
+      getRandomMovie();
+    }
 
-        // display results and add them to logs
-        $.when(A,B).done(function(){
-          console.log(cast);
-          var q = activePlayer +1;
-          var num = q.toString();
-          var yearStr = year.toString();
-          console.log(yearStr);
-          if (actOrMove === 1){
-            // append to trail
-            response = title;
-            trailId = "movie";
-            $("#p" + num + " > h5:nth-child(4)").append("(" + yearStr + ")");
-          }
-          else if (actOrMove === 0){
-            response = cast[0];
-            trailId = "actor";
-          }
-          $("#p" + num + " > h4:nth-child(3)").append(response);
-          trail.push(response);
-          console.log(trailId);
+    else{
+      // get the most recent input
+      var lastResponse = trail[trail.length-1];
+      if (trailId === "actor"){
+        url = baseQ + "/person" + key + lang + "&query=" + response;
+        getMovie();
+      }
+      else if (trailId === "movie"){
+        console.log("Robot response: "  + cast[0]);
+        response = cast[0];
+        $("#p" + num + " > h4:nth-child(3)").append(response);
+      }
+    }
+  }
+  else if (players[activePlayer] === "human"){
+    if (trail.length === 0){
+      // give prompt
+      $("#p" + num + " > h3:nth-child(2)").append("Enter a movie or an actor");
+      $("#active-players").on("click", "#submit" + num, function(){
+        userSearch = $("#searchTerm" + num).val();
+        searchMovie(userSearch);
+        $.when(A).done(function(){
+          getCast();
+          $.when(B).done(function(){
+            console.log(cast);
+            actOrMove = 1;
+            if (actOrMove === 1){
+              var yearStr = year.toString();
+              // append to trail
+              response = title;
+              trailId = "movie";
+              $("#p" + num + " > h5:nth-child(4)").append("(" + yearStr + ")");
+            }
+            else if (actOrMove === 0){
+              response = cast[0];
+              trailId = "actor";
+            }
+            $("#p" + num + " > h4:nth-child(3)").append(response);
+            trail.push(response);
+            console.log(trailId);
+            activePlayer += 1;
+            initiateGame();
+          });
         });
 
-      }
-    else{}
-    // display answer
-
-      // element.html(trail[-1]
-  }
-  else if (players[i] === "human" && trail.length === 0){
-    if (trail.length === 0){
-
+      });
     }
     else{}
   }
+
 }
 
 $(document).ready(function(){
@@ -117,9 +177,18 @@ $(document).ready(function(){
     players.push($('input[name="player2-type"]:checked').val());
     players.push($('input[name="player3-type"]:checked').val());
     players.push($('input[name="player4-type"]:checked').val());
+
+    // remove undefined players
+    for (var x = players.length; x--;){
+      if (players[x] === undefined){
+        players.splice(x, 1);
+      }
+
+    }
     console.log(players);
     // create the players
-    for (var i = 0; i < players.length; i++){
+    var length = players.length;
+    for (var i = 0; i < length; i++){
       var j = i + 1
       var num = j.toString();
       if (players[i] === "robot"){
@@ -133,33 +202,20 @@ $(document).ready(function(){
         // Append main viewer
         console.log("Human appended");
         $("#active-players").append("<div class='avatar'id='p" + num +
-                            "'><h2>Player " + num + "</h2><div class='prompt'><h3>" +
-                            "Enter a movie or an actor</h3></div><div class='input'>" +
-                            "<input id='searchTerm' type='text' placeholder=" +
-                            "'Movie or Actor...' /><i id='submit' class='fa fa-arrow-right'" +
+                            "'><h2>Player " + num + "</h2>" +
+                            "<h3></h3><div class='input'>" +
+                            "<input id='searchTerm" + num +
+                            "' type='text' placeholder=" +
+                            "'Movie or Actor...' /><i id='submit" + num +
+                            "' class='fa fa-arrow-right'" +
                             "aria-hidden='true'></i></div>");
       }
-      if (players[i] === undefined){
-        continue;
-      }
     }
-
-    setTimeout(function(){
-      $("#players-container").css("display", "none");
-      $("#main-game").slideDown(2000, function(){
-        $("#main-game").css("display", "flex");
-      });
-    }, 2500);
+    console.log(players);
+    $("#players-container").css("display", "none");
+    $("#main-game").css("display", "flex");
 
     initiateGame();
-  });
-
-  // User input
-  $('#active-players').on('click', '#submit', function() {
-    var searchTerm = $("#searchTerm").val();
-    url = baseQ + key + lang + "&query=" + searchTerm;
-    $.getJSON(url, searchMovie, "jsonp");
-    console.log("Loading");
   });
 
 });
