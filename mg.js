@@ -76,7 +76,6 @@ function searchMovie(searchTerm){
 function getCast(){
     var idStr = movieId.toString()
     url = baseId + idStr + "/credits" + key + lang;
-
     B = $.getJSON(url, function(data){
       for (var x in data.cast){
           cast.push(data.cast[x].name);
@@ -91,6 +90,7 @@ function initiateGame(){
   var num = q.toString();
   if (activePlayer >= players.length){
     activePlayer = activePlayer%players.length;
+    turn += 1;
   }
   if (players[activePlayer] === "robot"){
     if (trail.length === 0){
@@ -98,6 +98,24 @@ function initiateGame(){
       actOrMove = Math.floor(Math.random() * 2)
       // get random movie
       getRandomMovie();
+      $.when(A,B).done(function(){
+        if (actOrMove === 1){
+          var yearStr = year.toString();
+          // append to trail
+          response = title;
+          trailId = "movie";
+          $("#p" + num + " > h5:nth-child(4)").append("(" + yearStr + ")");
+        }
+        else if (actOrMove === 0){
+          response = cast[0];
+          trailId = "actor";
+        }
+        $("#p" + num + " > h4:nth-child(3)").append(response);
+        trail.push(response);
+        console.log(trailId);
+        activePlayer += 1;
+        initiateGame();
+      });
     }
 
     else{
@@ -110,6 +128,7 @@ function initiateGame(){
       else if (trailId === "movie"){
         console.log("Robot response: "  + cast[0]);
         response = cast[0];
+        trail.push(response);
         $("#p" + num + " > h4:nth-child(3)").append(response);
       }
     }
