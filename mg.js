@@ -11,6 +11,8 @@ var turn = 0;
 var round = 0;
 var strikes = 0;
 var trail = [];
+// movie or actor -- TrailId references the last response of trail
+// if trailId = movie the next response should be an actor
 var trailId = "";
 var players = [];
 var activePlayer = 0;
@@ -22,11 +24,14 @@ var response = "";
 var year;
 var userSearch = "";
 var movieId = 0;
+// 0 = actor 1 = movie
 var actOrMove = 0;
 
 // Event listener
 var A;
 var B;
+var C;
+var D;
 // 0 ez; 1 md; 2 hd
 var difficulty = 0;
 
@@ -49,8 +54,9 @@ function getRandomMovie(){
 
 function getMovie(){
   url = baseQ + "person" + key + lang + "&query=" + response;
-  A = $.getJSON(url, function(data){
+  C = $.getJSON(url, function(data){
     title = data.results[0].title;
+    console.log(title);
     id = data.results[0].title;
     year = data.results[0].release_date.slice(0,4);
     // search through trail to make sure this is a
@@ -58,7 +64,7 @@ function getMovie(){
   }, "jsonp");
   var idStr = id.toString();
   url = baseId + idStr + "/credits" + key + lang;
-  B = $.getJSON(url, function(data){
+  D = $.getJSON(url, function(data){
     cast = [];
     for (var x in data.cast){
         cast.push(data.cast[x].name);
@@ -85,12 +91,12 @@ function getCast(){
   }
 
 function initiateGame(){
-  console.log(trail);
-  console.log(trailId);
+  console.log("New round started");
+  console.log("trail: " + trail);
+  console.log("trailId: " + trailId);
   var q = activePlayer + 1;
   var num = q.toString();
-  console.log(activePlayer);
-  console.log(num);
+  console.log("active player: " + activePlayer);
   if (activePlayer >= players.length){
     activePlayer = activePlayer%players.length;
     turn += 1;
@@ -107,12 +113,12 @@ function initiateGame(){
           // append to trail
           response = title;
           // setting up the next trailID
-          trailId = "actor";
+          trailId = "movie";
           $("#p" + num + " > h5:nth-child(4)").append("(" + yearStr + ")");
         }
         else if (actOrMove === 0){
           response = cast[0];
-          trailId = "movie";
+          trailId = "actor";
         }
         $("#p" + num + " > h4:nth-child(3)").append(response);
         trail.push(response);
@@ -122,24 +128,40 @@ function initiateGame(){
     }
 
     else{
-      // get the most recent input
-      var lastResponse = trail[trail.length-1];
       if (trailId === "actor"){
-
+        console.log("robot getting movie from actor");
         getMovie();
-        $.when(A).done(function(){
+        $.when(C,D).done(function(){
+          console.log("in here");
           response = title;
+          console.log(response);
           trail.push(response);
           trailId = "movie";
           $("#p" + num + " > h4:nth-child(3)").append(response);
         });
       }
       else if (trailId === "movie"){
-        console.log("Robot response: "  + cast[0]);
-        response = cast[0];
+        // return an actor
+        // make sure it's unique
+        var actorRepeat = false;
+        for (var p in cast){
+          for (var x in trail){
+            if (cast[p] === trail[x]){
+              actorRepeat = true;
+          }
+          if (actorRepeat = false){
+            break;
+          }
+          }
+        }
+        response = cast[p];
         trail.push(response);
         $("#p" + num + " > h4:nth-child(3)").append(response);
+        trailId = "actor";
+        console.log("ID: " + trailId);
       }
+      activePlayer += 1;
+      initiateGame();
     }
   }
   else if (players[activePlayer] === "human"){
@@ -175,7 +197,7 @@ function initiateGame(){
       });
     }
     else{
-      if (trailId === "actor"){
+      if (trailId === "movie"){
         // prompt the user to enter an actor
         $("#p" + num + " > h3:nth-child(2)").append('Enter the name of an actor in "' + response +'"');
         $("#searchTerm" + num).attr("placeholder", "Actor...");
@@ -193,7 +215,7 @@ function initiateGame(){
               trail.push(userSearch);
               response = userSearch;
               // toggle trailId
-              trailId = "movie";
+              trailId = "actor";
               break;
             }
           }
@@ -207,7 +229,7 @@ function initiateGame(){
           initiateGame();
         });
       }
-      else if (trailId === "movie"){
+      else if (trailId === "actor"){
         $("#p" + num + " > h3:nth-child(2)").append('Enter the name of a movie with "' + response +'"');
         $("#searchTerm" + num).attr("placeholder", "Movie...");
         // listen for response
@@ -220,7 +242,7 @@ function initiateGame(){
               for (var i in cast){
                 if (userSearch.toUpperCase === cast[i].toUpperCase){
                   console.log("Correct!")
-                  trailId = "actor";
+                  trailId = "movie";
                   trail.push(userSearch);
                   break;
                 }
