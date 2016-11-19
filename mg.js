@@ -49,16 +49,19 @@ function getRandomMovie(){
     for (var x in data.cast){
       cast.push(data.cast[x].name);
     }
-  });
+  }, "jsonp");
 }
 
 function getMovie(){
   url = baseQ + "person" + key + lang + "&query=" + response;
+  console.log("url search movie by actor: " + url);
   C = $.getJSON(url, function(data){
-    title = data.results[0].title;
+    console.log("in here");
+    title = data.results[0].known_for[0].title;
+    console.log(data.results[0].known_for[0].title);
     console.log(title);
-    id = data.results[0].title;
-    year = data.results[0].release_date.slice(0,4);
+    id = data.results[0].known_for[0].id;
+    year = data.results[0].known_for[0].release_date.slice(0,4);
     // search through trail to make sure this is a
     // new response
   }, "jsonp");
@@ -101,6 +104,7 @@ function initiateGame(){
     activePlayer = activePlayer%players.length;
     turn += 1;
   }
+  var num = q.toString();
   if (players[activePlayer] === "robot"){
     if (trail.length === 0){
       // Pick a random actor or movie
@@ -131,13 +135,17 @@ function initiateGame(){
       if (trailId === "actor"){
         console.log("robot getting movie from actor");
         getMovie();
-        $.when(C,D).done(function(){
+        $.when(C).done(function(){
+          $.when(D).done(function(){
           console.log("in here");
           response = title;
           console.log(response);
           trail.push(response);
           trailId = "movie";
           $("#p" + num + " > h4:nth-child(3)").append(response);
+          activePlayer += 1;
+          initiateGame();
+          });
         });
       }
       else if (trailId === "movie"){
@@ -159,9 +167,9 @@ function initiateGame(){
         $("#p" + num + " > h4:nth-child(3)").append(response);
         trailId = "actor";
         console.log("ID: " + trailId);
+        activePlayer += 1;
+        initiateGame();
       }
-      activePlayer += 1;
-      initiateGame();
     }
   }
   else if (players[activePlayer] === "human"){
