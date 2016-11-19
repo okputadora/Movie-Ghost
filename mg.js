@@ -54,9 +54,20 @@ function getRandomMovie(){
 
 function getMovie(){
   url = baseQ + "person" + key + lang + "&query=" + response;
-  console.log("url search movie by actor: " + url);
   C = $.getJSON(url, function(data){
-    console.log("in here");
+    // make sure the selection is unique
+    var movieRepeat = false;
+    for (var i in data.results[0].known_for){
+      for (var q in trail){
+        if (data.results[0].known_for[i].toUpperCase === trail[q].toUpperCase){
+          movieRepeat = true;
+          break;
+        }
+      }
+      if (movieRepeat === false){
+        break;
+      }
+    }
     title = data.results[0].known_for[0].title;
     console.log(data.results[0].known_for[0].title);
     console.log(title);
@@ -99,11 +110,12 @@ function initiateGame(){
   console.log("trailId: " + trailId);
   var q = activePlayer + 1;
   var num = q.toString();
-  console.log("active player: " + activePlayer);
+
   if (activePlayer >= players.length){
-    activePlayer = activePlayer%players.length;
+    activePlayer = activePlayer%(players.length);
     turn += 1;
   }
+  console.log("active player: " + activePlayer);
   var num = q.toString();
   if (players[activePlayer] === "robot"){
     if (trail.length === 0){
