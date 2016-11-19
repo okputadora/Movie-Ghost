@@ -62,19 +62,18 @@
       </div>
 
       <div id="main-game">
-        <div id="stats">
-          <div id="round">Round: 0</div>
-          <div id="turn">Turn: 0</div>
-          <div class="letters">
-            <h3>Player 1</h3>
-            <h3>G H O S T</h3>
-          </div>
-          <div class="letters">
-            <h3>Player 2</h3>
-            <h3>G H O S T</h3>
-          </div>
+        <div id="stats-container">
+
+            <div id= "tracker">
+              <div id="round">Round: 0</div>
+              <div id="turn">Turn: 0</div>
+            </div>
+
+            <div class = "" id="player">Player: 1</div>
+            <div class="letters" id="letters">G H O S T</div>
         </div>
-        <!-- Add 4 human responses and robot responses
+        
+                  <!-- Add 4 human responses and robot responses
         and set their displays according to the number
         of players actually chose -->
         <div id="main-viewer">
@@ -82,7 +81,6 @@
           </div>
           <div id="game-map">
             <h2>Round 1</h2>
-            <div id="turn-display"></div>
           </div>
         </div>
       </div>

@@ -116,15 +116,31 @@ h1{
   position: absolute;
 }
 
-#stats{
-  width: 100px;
+#stats-container{
+  width: 150px;
   height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: flex-start;
-  margin: 25px;
-  border-right: 1px solid black
+  border-right: 1px solid black;
+  background-color: #75BEFF;
+  border: 1px solid blue;
+}
+#tracker{
+  margin-top: 15px;
+  width: 100%;
+}
+
+#tracker > div{
+  border: 1px solid black;
+  width: 100%;
+}
+}
+#stats div, #stats h3{
+  width: 100%;
+  height: 20px;
+  border: 1px solid black;
 }
 
 #main-viewer{
@@ -132,18 +148,22 @@ h1{
   flex-direction: column;
   justify-content: center;
   width: 100%;
+  height: 100%;
+  border: 1px solid orange;
 }
 
 #active-players{
   display: flex;
   flex-direction: row;
   justify-content: space-around;
+  border: 1px solid red;
 }
 
 .avatar{
   display: flex;
   flex-direction: column;
   border: 1px solid black;
+  border-radius: 30%;
   padding: 20px;
 }
 
