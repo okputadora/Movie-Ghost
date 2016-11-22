@@ -51,6 +51,7 @@ function getRandomMovie(){
   })
   url = baseId + idStr + "/credits" + key + lang;
   B = $.getJSON(url, function(data){
+    cast = [];
     for (var x in data.cast){
       cast.push(data.cast[x].name);
     }
@@ -73,10 +74,8 @@ function getMovie(){
         break;
       }
     }
-
     title = data.results[0].known_for[i].title;
     console.log(data.results.known_for);
-
     id = data.results[0].known_for[i].id;
     year = data.results[0].known_for[i].release_date.slice(0,4);
     // search through trail to make sure this is a
@@ -86,6 +85,7 @@ function getMovie(){
   url = baseId + idStr + "/credits" + key + lang;
   D = $.getJSON(url, function(data){
     console.log("PHERE");
+    cast = [];
     for (var x in data.cast){
         cast.push(data.cast[x].name);
       }
@@ -101,6 +101,7 @@ function searchMovie(searchTerm){
   }, "jsonp");
 }
 function getCast(){
+  cast = [];
     var idStr = movieId.toString()
     url = baseId + idStr + "/credits" + key + lang;
     B = $.getJSON(url, function(data){
@@ -174,10 +175,10 @@ function initiateGame(){
           for (var x in trail){
             if (cast[p] === trail[x]){
               actorRepeat = true;
+            }
           }
           if (actorRepeat = false){
             break;
-          }
           }
         }
         response = cast[p];
