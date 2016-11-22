@@ -24,6 +24,7 @@ var response = "";
 var year;
 var userSearch = "";
 var movieId = 0;
+var errorFound = false;
 // 0 = actor 1 = movie
 var actOrMove = 0;
 
@@ -43,13 +44,17 @@ function getRandomMovie(){
     title = data.title;
     id = data.id;
     year = data.release_date.slice(0,4);
-  }, "jsonp");
+  }, "jsonp")
+  .error(function(){
+      //try again
+      initiateGame();
+  })
   url = baseId + idStr + "/credits" + key + lang;
   B = $.getJSON(url, function(data){
     for (var x in data.cast){
       cast.push(data.cast[x].name);
     }
-  }, "jsonp");
+  }, "jsonp")
 }
 function getMovie(){
   url = baseQ + "person" + key + lang + "&query=" + response;
