@@ -41,39 +41,41 @@ function getRandomMovie(){
     title = data.title;
     id = data.id;
     year = data.release_date.slice(0,4);
+    console.log(year);
+    // get cast
+    url = baseId + idStr + "/credits" + key + lang;
+    $.getJSON(url, function(data){
+      cast = [];
+      for (var x in data.cast){
+        cast.push(data.cast[x].name);
+      }
+      // Pick a random actor or movie
+      // actOrMove = Math.floor(Math.random() * 2)
+      actOrMove = 1;
+      if (actOrMove === 1){
+        var yearStr = year.toString();
+        // append to trail
+        response = title;
+        // setting up the next trailID
+        trailId = "movie";
+        $("#p" + activeNum + " > h5:nth-child(4)").html("(" + yearStr + ")");
+      }
+      else if (actOrMove === 0){
+        response = cast[0];
+        trailId = "actor";
+      }
+      $("#p" + activeNum + " > h4:nth-child(3)").html(response);
+      trail.push(response);
+      activePlayer += 1;
+      console.log(trailId);
+      console.log(response);
+      console.log(cast);
+      initiateGame();
+    })
   })
   .error(function(){
       //try again
       initiateGame();
-  })
-  // get cast
-  url = baseId + idStr + "/credits" + key + lang;
-  $.getJSON(url, function(data){
-    cast = [];
-    for (var x in data.cast){
-      cast.push(data.cast[x].name);
-    }
-    // Pick a random actor or movie
-    actOrMove = Math.floor(Math.random() * 2)
-    if (actOrMove === 1){
-      var yearStr = year.toString();
-      // append to trail
-      response = title;
-      // setting up the next trailID
-      trailId = "movie";
-      $("#p" + activeNum + " > h5:nth-child(4)").html("(" + yearStr + ")");
-    }
-    else if (actOrMove === 0){
-      response = cast[0];
-      trailId = "actor";
-    }
-    $("#p" + activeNum + " > h4:nth-child(3)").html(response);
-    trail.push(response);
-    activePlayer += 1;
-    console.log(trailId);
-    console.log(response);
-    console.log(cast);
-    initiateGame();
   })
 }
 //search movie by id return cast
@@ -111,7 +113,7 @@ function getRobotResponse(){
       // new response
       for (var i in data.results[0].known_for){
         for (var q in trail){
-          if (data.results[0].known_for[i].toUpperCase === trail[q].toUpperCase){
+          if (data.results[0].known_for[i].title.toUpperCase() === trail[q].toUpperCase()){
             movieRepeat = true;
           }
         }
@@ -119,7 +121,7 @@ function getRobotResponse(){
           break;
         }
       }
-
+      console.log("Index: " + i);
       title = data.results[0].known_for[i].title;
       console.log("title: " + title);
       console.log("trail: " + trail);
