@@ -23,14 +23,14 @@ var response = "";
 var year;
 var userSearch = "";
 var movieId = 0;
-//activeNum is used to append answer to appropriate player
-var activeNum = "";
+//activeactiveNum is used to append answer to appropriate player
+var activeactiveNum = "";
 // 0 = actor 1 = movie
 var actOrMove = 0;
 
 // 0 ez; 1 md; 2 hd
 var difficulty = 0;
-
+//search movie by random number return movie title
 function getRandomMovie(){
   id =  Math.floor(Math.random() * 1000);
   var idStr = id.toString();
@@ -44,6 +44,7 @@ function getRandomMovie(){
       //try again
       initiateGame();
   })
+  // get cast
   url = baseId + idStr + "/credits" + key + lang;
   $.getJSON(url, function(data){
     cast = [];
@@ -58,53 +59,90 @@ function getRandomMovie(){
       response = title;
       // setting up the next trailID
       trailId = "movie";
-      $("#p" + num + " > h5:nth-child(4)").html("(" + yearStr + ")");
+      $("#p" + activeNum + " > h5:nth-child(4)").html("(" + yearStr + ")");
     }
     else if (actOrMove === 0){
       response = cast[0];
       trailId = "actor";
     }
-    $("#p" + num + " > h4:nth-child(3)").html(response);
+    $("#p" + activeNum + " > h4:nth-child(3)").html(response);
     trail.push(response);
     activePlayer += 1;
+    console.log(trailId);
+    console.log(response);
+    console.log(cast);
     initiateGame();
   })
 }
-function getMovieById(){
-  url = baseQ + "person" + key + lang + "&query=" + response;
-  C = $.getJSON(url, function(data){
-    // make sure the selection is unique
-    var movieRepeat = false;
-    console.log(data.results[0].known_for);
-    for (var i in data.results[0].known_for){
-      for (var q in trail){
-        if (data.results[0].known_for[i].toUpperCase === trail[q].toUpperCase){
-          movieRepeat = true;
-          console.log("Repeat :" + movieRepeat);
+//search movie by id return cast
+function getRobotResponse(){
+  // if last response = movie return unique actor
+  if (trailId === "movie"){
+    // return an actor
+    for (var p in cast){
+      // make sure it's unique
+      var actorRepeat = false;
+      for (var x in trail){
+        if (cast[p].toUpperCase === trail[x].toUpperCase){
+          actorRepeat = true;
         }
       }
-      if (movieRepeat === false){
+      if (actorRepeat === false){
+        console.log("actor repeat: " + actorRepeat);
         break;
       }
     }
-    title = data.results[0].known_for[i].title;
-    console.log(data.results.known_for);
-    id = data.results[0].known_for[i].id;
-    year = data.results[0].known_for[i].release_date.slice(0,4);
-    // search through trail to make sure this is a
-    // new response
-  }, "jsonp");
-  var idStr = id.toString();
-  url = baseId + idStr + "/credits" + key + lang;
-  D = $.getJSON(url, function(data){
-    console.log("PHERE");
-    cast = [];
-    for (var x in data.cast){
-        cast.push(data.cast[x].name);
+    response = cast[p];
+    trail.push(response);
+    trailId = "movie";
+    $("#p" + activeNum + " > h4:nth-child(3)").html(response);
+    activePlayer += 1;
+    initiateGame();
+  }
+  else if (trailId === "actor"){
+    // search for a movie with this actor
+    url = baseQ + "person" + key + lang + "&query=" + response;
+    console.log(url);
+    $.getJSON(url, function(data){
+      // make sure the selection is unique
+      var movieRepeat = false;
+      console.log(data.results[0].known_for);
+      // search through trail to make sure this is a
+      // new response
+      for (var i in data.results[0].known_for){
+        for (var q in trail){
+          if (data.results[0].known_for[i].toUpperCase === trail[q].toUpperCase){
+            movieRepeat = true;
+            console.log("Repeat :" + movieRepeat);
+          }
+        }
+        if (movieRepeat === false){
+          break;
+        }
       }
-      console.log("cast after search" + cast)
-  }, "jsonp");
-}
+      title = data.results[0].known_for[i].title;
+      id = data.results[0].known_for[i].id;
+      year = data.results[0].known_for[i].release_date.slice(0,4);
+      // get the credits for the next round
+      var idStr = id.toString();
+      url = baseId + idStr + "/credits" + key + lang;
+      $.getJSON(url, function(data){
+        cast = [];
+        for (var x in data.cast){
+            cast.push(data.cast[x].name);
+          }
+          console.log("cast after search" + cast)
+          response = title;
+          trail.push(response);
+          trailId = "movie";
+          $("#p" + activeNum + " > h4:nth-child(3)").html(response);
+          activePlayer += 1;
+          initiateGame();
+        });
+      });
+    }
+  }
+
 function searchMovie(searchTerm){
   url = baseQ + "movie" + key + lang + "&query=" + searchTerm;
   E = $.getJSON(url, function(data){
@@ -125,75 +163,28 @@ function getCast(){
   }
 
 function initiateGame(){
-  console.log("New round started");
-  console.log("trail: " + trail);
-  console.log("trailId: " + trailId);
-  console.log(cast)
   if (activePlayer >= players.length){
     activePlayer = activePlayer%(players.length);
     turn += 1;
   }
   var q = activePlayer + 1;
   console.log("active player: " + activePlayer);
-  ActiveNum = q.toString();
+  activeNum = q.toString();
   if (players[activePlayer] === "robot"){
     if (trail.length === 0){
       // get random movie
       getRandomMovie();
     }
     else{
-      getMovieById();
-      if (trailId === "actor"){
-        console.log("robot getting movie from actor");
-        getMovie();
-        $.when(C).done(function(){
-          $.when(D).done(function(){
-          console.log("in here");
-          response = title;
-          console.log(response);
-          trail.push(response);
-          trailId = "movie";
-          console.log("#p" +num + " being appended");
-          $("#p" + num + " > h4:nth-child(3)").html(response);
-          activePlayer += 1;
-          initiateGame();
-          });
-        });
-      }
-      else if (trailId === "movie"){
-        // return an actor
-        for (var p in cast){
-          // make sure it's unique
-          var actorRepeat = false;
-          for (var x in trail){
-            if (cast[p] === trail[x]){
-              console.log("cast: " + cast[p]);
-              console.log("trail: " + trail[x]);
-              actorRepeat = true;
-            }
-          }
-          console.log("P: " + p);
-          if (actorRepeat === false){
-            console.log("actor repeat: " + actorRepeat);
-            break;
-          }
-        }
-        response = cast[p];
-        trail.push(response);
-        $("#p" + num + " > h4:nth-child(3)").html(response);
-        trailId = "actor";
-        console.log("ID: " + trailId);
-        activePlayer += 1;
-        initiateGame();
-      }
+      getRobotResponse();
     }
   }
   else if (players[activePlayer] === "human"){
     if (trail.length === 0){
       // give prompt
-      $("#p" + num + " > h3:nth-child(2)").html("Enter a movie or an actor");
-      $("#active-players").on("click", "#submit" + num, function(){
-        userSearch = $("#searchTerm" + num).val();
+      $("#p" + activeNum + " > h3:nth-child(2)").html("Enter a movie or an actor");
+      $("#active-players").on("click", "#submit" + activeNum, function(){
+        userSearch = $("#searchTerm" + activeNum).val();
         searchMovie(userSearch);
         $.when(E).done(function(){
           getCast();
@@ -205,13 +196,13 @@ function initiateGame(){
               // append to trail
               response = title;
               trailId = "movie";
-              $("#p" + num + " > h5:nth-child(4)").html("(" + yearStr + ")");
+              $("#p" + activeNum + " > h5:nth-child(4)").html("(" + yearStr + ")");
             }
             else if (actOrMove === 0){
               response = cast[0];
               trailId = "actor";
             }
-            $("#p" + num + " > h4:nth-child(3)").html(response);
+            $("#p" + activeNum + " > h4:nth-child(3)").html(response);
             trail.push(response);
             activePlayer += 1;
             initiateGame();
@@ -223,12 +214,12 @@ function initiateGame(){
     else{
       if (trailId === "movie"){
         // prompt the user to enter an actor
-        $("#p" + num + " > h3:nth-child(2)").html('Enter the name of an actor in "' + response +'"');
-        $("#searchTerm" + num).val("");
-        $("#searchTerm" + num).attr("placeholder", "Actor...");
+        $("#p" + activeNum + " > h3:nth-child(2)").html('Enter the name of an actor in "' + response +'"');
+        $("#searchTerm" + activeNum).val("");
+        $("#searchTerm" + activeNum).attr("placeholder", "Actor...");
         // listen for response
-        $("#active-players").on("click", "#submit" + num, function(){
-          userSearch = $("#searchTerm" + num).val();
+        $("#active-players").on("click", "#submit" + activeNum, function(){
+          userSearch = $("#searchTerm" + activeNum).val();
           // check if it's in the cast list
           var correctAnswer = false;
           for (var i = 0; i < cast.length; i++){
@@ -256,12 +247,12 @@ function initiateGame(){
         });
       }
       else if (trailId === "actor"){
-        $("#p" + num + " > h3:nth-child(2)").html('Enter the name of a movie with "' + response +'"');
-        $("#searchTerm" + num).val("");
-        $("#searchTerm" + num).attr("placeholder", "Movie...");
+        $("#p" + activeNum + " > h3:nth-child(2)").html('Enter the name of a movie with "' + response +'"');
+        $("#searchTerm" + activeNum).val("");
+        $("#searchTerm" + activeNum).attr("placeholder", "Movie...");
         // listen for response
-        $("#active-players").on("click", "#submit" + num, function(){
-          userSearch = $("#searchTerm" + num).val();
+        $("#active-players").on("click", "#submit" + activeNum, function(){
+          userSearch = $("#searchTerm" + activeNum).val();
           searchMovie(userSearch);
           $.when(E).done(function(){
             getCast();
@@ -322,23 +313,23 @@ $(document).ready(function(){
     var length = players.length;
     for (var i = 0; i < length; i++){
       var j = i + 1
-      var num = j.toString();
+      var activeNum = j.toString();
       if (players[i] === "robot"){
         // Append main viewer
-        $("#active-players").append("<div class='avatar'id='p" + num +"'>" +
-                                    "<h2>Player " + num + "</h2><div class='name'>" +
+        $("#active-players").append("<div class='avatar'id='p" + activeNum +"'>" +
+                                    "<h2>Player " + activeNum + "</h2><div class='name'>" +
                                     "<h3>Robot</h3></div><h4></h4><h5></h5>");
         // document.getElementById("active-players").appendChild("div");/
       }
       if (players[i] === "human"){
         // Append main viewer
         console.log("Human appended");
-        $("#active-players").append("<div class='avatar'id='p" + num +
-                            "'><h2>Player " + num + "</h2>" +
+        $("#active-players").append("<div class='avatar'id='p" + activeNum +
+                            "'><h2>Player " + activeNum + "</h2>" +
                             "<h3></h3><div class='input'>" +
-                            "<input id='searchTerm" + num +
+                            "<input id='searchTerm" + activeNum +
                             "' type='text' placeholder=" +
-                            "'Movie or Actor...' /><i id='submit" + num +
+                            "'Movie or Actor...' /><i id='submit" + activeNum +
                             "' class='fa fa-arrow-right'" +
                             "aria-hidden='true'></i></div>");
       }
