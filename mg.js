@@ -34,7 +34,8 @@ var actOrMove = 0;
 var difficulty = 0;
 //search movie by random number return movie title
 function getRandomMovie(){
-  id =  Math.floor(Math.random() * 1000);
+  id =  Math.floor(Math.random() * 10000);
+  console.log(id);
   var idStr = id.toString();
   url = baseId + idStr + key + lang;
   $.getJSON(url, function(data){
@@ -50,8 +51,7 @@ function getRandomMovie(){
         cast.push(data.cast[x].name);
       }
       // Pick a random actor or movie
-      // actOrMove = Math.floor(Math.random() * 2)
-      actOrMove = 1;
+      actOrMove = Math.floor(Math.random() * 2)
       if (actOrMove === 1){
         var yearStr = year.toString();
         // append to trail
@@ -106,6 +106,7 @@ function getRobotResponse(){
     console.log(trailId);
     // search for a movie with this actor
     url = baseQ + "person" + key + lang + "&query=" + response;
+    console.log(url);
     $.getJSON(url, function(data){
       // make sure the selection is unique
       var movieRepeat = false;
@@ -151,32 +152,66 @@ function getRobotResponse(){
 function getHumanResponse(searchTerm){
   if (trail.length === 0){
     // try searching for a movie first;
+    console.log("in here");
     url = baseQ + "movie" + key + lang + "&query=" + searchTerm;
+    console.log(url);
     $.getJSON(url, function(data){
-      title = data.results[0].title;
-      movieId = data.results[0].id;
-      year = data.results[0].release_date.slice(0,4);
-      // get the cast for the next response
-      cast = [];
-      var idStr = movieId.toString()
-      url = baseId + idStr + "/credits" + key + lang;
-      $.getJSON(url, function(data){
-        for (var x in data.cast){
-            cast.push(data.cast[x].name);
-        }
-        // collect response
-        response = title;
-      });
-    })
-    .error(function(){
-      // if that fails try actor
+      if (data.total_results === 0){
+        movieFound = false;
+      }
+      else{
+        movieFound = true;
+      }
+      if (movieFound === true){
+        title = data.results[0].title;
+        movieId = data.results[0].id;
+        year = data.results[0].release_date.slice(0,4);
+        // get the cast for the next response
+        cast = [];
+        var idStr = movieId.toString()
+        url = baseId + idStr + "/credits" + key + lang;
+        $.getJSON(url, function(data){
+          for (var x in data.cast){
+              cast.push(data.cast[x].name);
+          }
+          // collect response
+          response = title;
+          var yearStr = year.toString();
+          // append to trail
+          trailId = "movie";
+          $("#p" + activeNum + " > h5:nth-child(4)").html("(" + yearStr + ")");
+          $("#p" + activeNum + " > h4:nth-child(3)").html(response);
+          trail.push(response);
+          // Reset
+          movieFound = false;
+          activePlayer += 1;
+          initiateGame();
+        })
+      }
+      else if (movieFound === false){
+        console.log("WE IN HERE");
+        url = baseQ + "person" + key + lang + "&query=" + searchTerm;
+        $.getJSON(url, function(data){
+          if (data.total_results === 0){
+            alert("you entered an incorrect response");
+          }
+          else{
+            trailId = "actor";
+            response = searchTerm;
+            trail.push(response);
+            activePlayer += 1;
+            initiateGame();
+          }
+        })
+      }
     })
   }
   else if (trailId === "actor"){
     // check if tha actor is in searchTerm
     // this is an exact copy of the code above is there a way to cut this?
     url = baseQ + "movie" + key + lang + "&query=" + searchTerm;
-    $.getJSON(url, function(){
+    console.log(url);
+    $.getJSON(url, function(data){
       title = data.results[0].title;
       movieId = data.results[0].id;
       year = data.results[0].release_date.slice(0,4);
@@ -188,7 +223,7 @@ function getHumanResponse(searchTerm){
         for (var x in data.cast){
           cast.push(data.cast[x].name);
           // while we're in here check if the actor is in this movie
-          if (response.toUpperCase() === data.cast[x].toUpperCase()){
+          if (response.toUpperCase() === data.cast[x].name.toUpperCase()){
             actorFound = true;
           }
         }
@@ -224,6 +259,7 @@ function getHumanResponse(searchTerm){
       trailId = "actor";
       movieFound = false;
       $("#p" + activeNum + " > h4:nth-child(3)").html(response);
+      trail.push(response);
       activePlayer += 1;
       initiateGame();
     }
