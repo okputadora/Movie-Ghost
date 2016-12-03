@@ -159,6 +159,19 @@ function getRobotResponse(){
   }
 }
 
+function searchPerson(){
+  url = baseQ + "person" + key + lang + "&query=" + searchTerm;
+  $.getJSON(url, function(data){
+    if (data.total_results === 0){
+      console.log("you entered an incorrect response");
+    }
+    else{
+      response = searchTerm;
+      postResponse();
+    }
+  })
+}
+
 function searchMovie(){
   url = baseQ + "movie" + key + lang + "&query=" + searchTerm;
   $.getJSON(url, function(data){
@@ -178,6 +191,9 @@ function searchMovie(){
       // equivalent to if the last id was an actor (ie. this id is a movie)
       trailId = "actor";
       getCast();
+    }
+    else{
+      searchPerson();
     }
   })
 }
