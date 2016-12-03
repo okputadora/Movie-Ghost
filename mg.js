@@ -203,16 +203,30 @@ function getHumanResponse(){
     searchMovie();
   }
   else if (trailId === "actor"){
-
+    // get movie
+    searchMovie();
   }
   else if (trailId === "movie"){
-
+    console.log(cast);
+    var actorFound = false;
+    for (var i in cast){
+      if (searchTerm.toUpperCase() === cast[i].toUpperCase()){
+        actorFound = true;
+        break;
+      }
+    }
+    if (actorFound === true){
+      response = searchTerm;
+      postResponse();
+    }
+    else{console.log("Incorrect");}
   }
 }
 
 
 
 function initiateGame(){
+  console.log("game initiated");
   // increment turn if a new round has been started
   if (activePlayer >= players.length){
     activePlayer = activePlayer%(players.length);
@@ -222,7 +236,7 @@ function initiateGame(){
   activeNum = (activePlayer + 1).toString();
   console.log(activePlayer);
   console.log(activeNum);
-;  //
+  //
   if (players[activePlayer] === "robot"){
     if (trail.length === 0){
       // get random movie if this is the first round
