@@ -54,7 +54,6 @@ function postResponse(){
   // delay a bit for better UI
   console.log("Trail ID: " + trailId);
   console.log("Response: " + response);
-  console.log("cast: " + cast);
   console.log("trail: " + trail);
   setTimeout(initiateGame, 3000);
 }
@@ -133,6 +132,7 @@ function getMovieFromActor(){
     id = data.results[0].known_for[i].id;
     idStr = id.toString()
     year = data.results[0].known_for[i].release_date.slice(0,4);
+    yearStr = year.toString();
     response = title;
     console.log("TITLE: " + title);
     getCast();
