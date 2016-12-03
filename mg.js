@@ -40,14 +40,16 @@ function postResponse(){
   // post response
   $("#p" + activeNum + " > h4:nth-child(3)").html(response);
   $("#p" + activeNum + " > h5:nth-child(4)").html("");
+  console.log(trailId + actOrMove)
   if (trailId === "actor" || (actOrMove === 1 && trail.length === 0)){
+    console.log("conditionmet");
     // post the year
     $("#p" + activeNum + " > h5:nth-child(4)").html("(" + yearStr + ")");
     trailId = 'movie';
   }
   else{trailId = 'actor';}
   trail.push(response);
-  $(".trail").html(trail);
+  $("#trail").html(trail + " -> ");
   activePlayer += 1;
   // delay a bit for better UI
   console.log("Trail ID: " + trailId);
@@ -86,7 +88,7 @@ function getCast(){
     if ((actOrMove === 0 && trail.length === 0) || trailId === 'movie'){
       checkActorUnique();
     }
-    postResponse();
+    else{postResponse();}
   });
 }
 
@@ -172,7 +174,9 @@ function initiateGame(){
   }
   // get the active player in string format to append appropriate divs
   activeNum = (activePlayer + 1).toString();
-  //
+  console.log(activePlayer);
+  console.log(activeNum);
+;  //
   if (players[activePlayer] === "robot"){
     if (trail.length === 0){
       // get random movie if this is the first round
