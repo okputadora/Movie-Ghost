@@ -31,7 +31,7 @@ var userSearch = "";
 var movieId = 0;
 
 // 0 = actor 1 = movie
-var actOrMove = 0;
+var actOrMove;
 
 // 0 ez; 1 md; 2 hd
 var difficulty = 0;
@@ -40,9 +40,7 @@ function postResponse(){
   // post response
   $("#p" + activeNum + " > h4:nth-child(3)").html(response);
   $("#p" + activeNum + " > h5:nth-child(4)").html("");
-  console.log(trailId + actOrMove)
   if (trailId === "actor" || (actOrMove === 1 && trail.length === 0)){
-    console.log("conditionmet");
     // post the year
     $("#p" + activeNum + " > h5:nth-child(4)").html("(" + yearStr + ")");
     trailId = 'movie';
@@ -52,10 +50,9 @@ function postResponse(){
   $("#trail").html(trail + " -> ");
   activePlayer += 1;
   // delay a bit for better UI
-  console.log("Trail ID: " + trailId);
   console.log("Response: " + response);
   console.log("trail: " + trail);
-  setTimeout(initiateGame, 3000);
+  setTimeout(initiateGame, 2000);
 }
 
 function checkActorUnique(){
@@ -121,6 +118,7 @@ function getMovieFromActor(){
     for (var i in data.results[0].known_for){
       for (var q in trail){
         if (data.results[0].known_for[i].title.toUpperCase() === trail[q].toUpperCase()){
+          console.log("repeat = true")
           movieRepeat = true;
         }
       }
@@ -161,9 +159,41 @@ function getRobotResponse(){
   }
 }
 
-function getHumanResponse(){
-
+function searchMovie(){
+  url = baseQ + "movie" + key + lang + "&query=" + searchTerm;
+  $.getJSON(url, function(data){
+    if (data.total_results === 0){
+      movieFound = false;
+    }
+    else{
+      movieFound = true;
+    }
+    if (movieFound === true){
+      title = data.results[0].title;
+      movieId = data.results[0].id;
+      year = data.results[0].release_date.slice(0,4);
+      yearStr = year.toString();
+      idStr = movieId.toString();
+      response = title;
+      // equivalent to if the last id was an actor (ie. this id is a movie)
+      trailId = "actor";
+      getCast();
+    }
+  })
 }
+
+function getHumanResponse(){
+  if (trail.length === 0){
+    searchMovie();
+  }
+  else if (trailId === "actor"){
+
+  }
+  else if (trailId === "movie"){
+
+  }
+}
+
 
 
 function initiateGame(){
@@ -201,9 +231,10 @@ function initiateGame(){
       $("#searchTerm" + activeNum).attr("placeholder", "Actor...");
       $("#p" + activeNum + " > h3:nth-child(2)").html('Enter the name of an actor in "' + response +'"');
     }
+    console.log("waiting for searchTerm");
     $("#active-players").on("click", "#submit" + activeNum, function(){
-      userSearch = $("#searchTerm" + activeNum).val();
-      getHumanResponse(userSearch);
+      searchTerm = $("#searchTerm" + activeNum).val();
+      getHumanResponse();
     });
   }
 }
